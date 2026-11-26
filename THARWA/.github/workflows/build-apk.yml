@@ -26,12 +26,40 @@ jobs:
         with:
           channel: stable
 
-      - name: Create Flutter project if needed
+      - name: Create Flutter Android project
         run: |
-          if [ ! -f pubspec.yaml ]; then
-            flutter create --org com.tharwa app
-            cp -r app/. .
-          fi
+          flutter create --org com.tharwa --project-name tharwa app
+          mkdir -p android
+          cp -R app/android/. android/
+
+      - name: Create pubspec.yaml
+        run: |
+          cat > pubspec.yaml <<'EOF'
+          name: tharwa
+          description: Tharwa Farm Management
+          publish_to: 'none'
+          version: 1.0.0+1
+
+          environment:
+            sdk: '>=3.4.0 <4.0.0'
+
+          dependencies:
+            flutter:
+              sdk: flutter
+            sqflite: ^2.4.2
+            path: ^1.9.1
+
+          dev_dependencies:
+            flutter_test:
+              sdk: flutter
+            flutter_lints: ^5.0.0
+
+          flutter:
+            uses-material-design: true
+          EOF
+
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --release
@@ -39,6 +67,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: tharwa-apk
+          name: Tharwa-APK
           path: build/app/outputs/flutter-apk/app-release.apk
-          
